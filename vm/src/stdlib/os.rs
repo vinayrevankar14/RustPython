@@ -28,6 +28,13 @@ use crate::pyobject::{
 };
 use crate::vm::VirtualMachine;
 
+// this is basically what CPython has for Py_off_t; windows uses long long
+// for offsets, other platforms just use off_t
+#[cfg(not(windows))]
+pub type Offset = libc::off_t;
+#[cfg(windows)]
+pub type Offset = libc::c_longlong;
+
 #[derive(Debug, Copy, Clone)]
 enum OutputMode {
     String,
@@ -719,13 +726,6 @@ mod _os {
         })?;
         Ok(buf)
     }
-
-    // this is basically what CPython has for Py_off_t; windows uses long long
-    // for offsets, other platforms just use off_t
-    #[cfg(not(windows))]
-    pub type Offset = libc::off_t;
-    #[cfg(windows)]
-    pub type Offset = libc::c_longlong;
 
     #[pyfunction]
     fn isatty(fd: i32) -> bool {
