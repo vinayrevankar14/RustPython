@@ -324,15 +324,7 @@ impl PyBytesInner {
     }
 
     fn value_try_from_object(vm: &VirtualMachine, object: PyObjectRef) -> PyResult<u8> {
-        let value = vm.to_index(&object).ok_or_else(|| {
-            vm.new_type_error(format!(
-                "'{}' object cannot be interpreted as an integer",
-                object.class().name
-            ))
-        })?;
-        // __index__ returned non-int type
-        let value = value?;
-        value
+        vm.to_index(&object)?
             .borrow_value()
             .to_u8()
             .ok_or_else(|| vm.new_value_error("byte must be in range(0, 256)".to_owned()))

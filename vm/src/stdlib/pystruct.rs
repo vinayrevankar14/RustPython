@@ -285,7 +285,7 @@ pub(crate) mod _struct {
     where
         T: TryFromObject,
     {
-        match vm.to_index(arg) {
+        match vm.to_index_opt(arg.clone()) {
             Some(index) => Ok(T::try_from_object(vm, index?.into_object())?),
             None => Err(new_struct_error(
                 vm,
