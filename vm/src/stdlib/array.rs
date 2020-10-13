@@ -38,7 +38,7 @@ impl fmt::Display for ArrayTypeSpecifierError {
 }
 
 macro_rules! def_array_enum {
-    ($(($n:ident, $t:ident, $c:literal)),*$(,)?) => {
+    ($(($n:ident, $t:ident, $c:literal, $scode:literal)),*$(,)?) => {
         #[derive(Debug, Clone)]
         enum ArrayContentType {
             $($n(Vec<$t>),)*
@@ -56,6 +56,12 @@ macro_rules! def_array_enum {
             fn typecode(&self) -> char {
                 match self {
                     $(ArrayContentType::$n(_) => $c,)*
+                }
+            }
+
+            fn typecode_str(&self) -> &'static str {
+                match self {
+                    $(ArrayContentType::$n(_) => $scode,)*
                 }
             }
 
@@ -395,22 +401,22 @@ macro_rules! def_array_enum {
 }
 
 def_array_enum!(
-    (SignedByte, i8, 'b'),
-    (UnsignedByte, u8, 'B'),
+    (SignedByte, i8, 'b', "b"),
+    (UnsignedByte, u8, 'B', "B"),
     // TODO: support unicode char
-    (SignedShort, i16, 'h'),
-    (UnsignedShort, u16, 'H'),
-    (SignedInt, i32, 'i'),
-    (UnsignedInt, u32, 'I'),
-    (SignedLong, i32, 'l'),
-    (UnsignedLong, u32, 'L'),
+    (SignedShort, i16, 'h', "h"),
+    (UnsignedShort, u16, 'H', "H"),
+    (SignedInt, i32, 'i', "i"),
+    (UnsignedInt, u32, 'I', "I"),
+    (SignedLong, i32, 'l', "l"),
+    (UnsignedLong, u32, 'L', "L"),
     // FIXME: architecture depended size
-    // (SignedLong, i64, 'l'),
-    // (UnsignedLong, u64, 'L'),
-    (SignedLongLong, i64, 'q'),
-    (UnsignedLongLong, u64, 'Q'),
-    (Float, f32, 'f'),
-    (Double, f64, 'd'),
+    // (SignedLong, i64, 'l', "l"),
+    // (UnsignedLong, u64, 'L', "L"),
+    (SignedLongLong, i64, 'q', "q"),
+    (UnsignedLongLong, u64, 'Q', "Q"),
+    (Float, f32, 'f', "f"),
+    (Double, f64, 'd', "d"),
 );
 
 trait ArrayElement: Sized {
@@ -896,7 +902,7 @@ impl Buffer for PyArrayRef {
                 readonly: false,
                 len: array.len(),
                 itemsize: array.itemsize(),
-                format: array.typecode().to_string(),
+                format: array.typecode_str().into(),
                 ..Default::default()
             }));
             PyRwLockWriteGuard::downgrade(w)
